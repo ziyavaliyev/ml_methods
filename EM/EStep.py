@@ -19,21 +19,5 @@ def EStep(means, covariances, weights, X):
     # logLikelihood  : Log-likelihood (a scalar).
     # gamma          : NxK matrix of responsibilities for N datapoints and K Gaussians.
 
-    #####Start Subtask 6b#####
-    logLikelihood = getLogLikelihood(means, weights, covariances, X)
-
-    n_training_samples, dim = X.shape
-    K = len(weights)
-
-    gamma = np.zeros((n_training_samples, K))
-    for i in range(n_training_samples):
-        for j in range(K):
-            means_diff = X[i] - means[j]
-            covariance = covariances[:, :, j].copy()
-            norm = 1. / float(((2 * np.pi) ** (float(dim) / 2)) * np.sqrt(np.linalg.det(covariances[:, :, j])))
-            gamma[i, j] = weights[j] * norm * np.exp(
-                -0.5 * (means_diff.T.dot(np.linalg.lstsq(covariance.T, means_diff.T)[0].T)))
-        gamma[i] /= gamma[i].sum()
-
-    #####End Subtask#####
+    #####Insert your code here for subtask 6b#####
     return [logLikelihood, gamma]

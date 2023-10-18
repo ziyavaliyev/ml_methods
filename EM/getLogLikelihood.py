@@ -1,11 +1,17 @@
 import numpy as np
+
+def normal(mean, covariance, x, N, K, D):
+    factor = 1/(((2*np.pi)**(D/2)) * ((np.linalg.det(covariance))**(1/2)))
+    exponent = -0.5* np.dot(np.dot((x-mean), np.linalg.inv(covariance)), np.transpose(x-mean))
+    return factor*np.exp(exponent)
+
 def getLogLikelihood(means, weights, covariances, X):
     # Log Likelihood estimation
     #
     # INPUT:
     # means          : Mean for each Gaussian KxD
-    # weights        : Weight vector 1xK for K Gaussians
-    # covariances    : Covariance matrices for each gaussian DxDxK
+    # weights        : Weight vector 1xK for K Gaussians +
+    # covariances    : Covariance matrices for each gaussian DxDxK 
     # X              : Input data NxD
     # where N is number of data points
     # D is the dimension of the data points
@@ -14,33 +20,16 @@ def getLogLikelihood(means, weights, covariances, X):
     # OUTPUT:
     # logLikelihood  : log-likelihood
 
-    #####Start Subtask 6a#####
-    if len(X.shape) > 1:
-        N, D = X.shape
-    else:
-        N = 1
-        D = X.shape[0]
-
-    # get number of gaussians
-    K = len(weights)
-
+    #####Insert your code here for subtask 6a#####
+    
     logLikelihood = 0
-    for i in range(N):  # For each of the data points
-        # probability p
-        p = 0
-        for j in range(K):  # For each of the mixture components
-
-            if N == 1:
-                meansDiff = X - means[j]
-            else:
-                meansDiff = X[i,:] - means[j]
-
-            covariance = covariances[:, :, j].copy()
-            norm = 1. / float(((2 * np.pi) ** (float(D) / 2.)) * np.sqrt(np.linalg.det(covariance)))
-
-
-            p += weights[j] * norm * np.exp(-0.5 * ((meansDiff.T).dot(np.linalg.lstsq(covariance.T, meansDiff.T)[0].T)))
-        logLikelihood += np.log(p)
-    #####End Subtask#####
+    bracket = []
+    N, D = X.shape
+    K = len(weights)
+    for n in range(N):
+        bracket = []
+        for k in range(K):
+            bracket.append(weights[k]*normal(means[k], covariances[:, :, k], X[n], N, K, D)) # "(x_n|mu_k, SIGMA_k)"
+        logLikelihood += np.log(sum(bracket))
     return logLikelihood
 
