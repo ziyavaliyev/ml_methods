@@ -24,9 +24,9 @@ print('Question: Expectation Maximization Algorithm for GMMs')
 
 # load datasets
 data = [[], [], []]
-data[0] = np.loadtxt('data1')
-data[1] = np.loadtxt('data2')
-data[2] = np.loadtxt('data3')
+data[0] = np.loadtxt('/Users/ziya03/Github/ml_methods/EM/data1')
+data[1] = np.loadtxt('/Users/ziya03/Github/ml_methods/EM/data2')
+data[2] = np.loadtxt('/Users/ziya03/Github/ml_methods/EM/data3')
 
 # test getLogLikelihood
 print('(a) testing getLogLikelihood function')
@@ -53,7 +53,7 @@ covariances[:, :, 2] = [
 loglikelihoods = [-1.098653352229586e+03, -1.706951862352565e+03, -1.292882804841197e+03]
 for idx in range(3):
     ll = getLogLikelihood(means, weights, covariances, data[idx])
-    diff = loglikelihoods[idx] - ll
+    diff = np.round(loglikelihoods[idx] - ll)
     print('LogLikelihood is {0}, should be {1}, difference: {2}\n'.format(ll, loglikelihoods[idx], diff))
 
 # test EStep
@@ -61,12 +61,12 @@ print('\n')
 print('(b) testing EStep function')
 # load gamma values
 testgamma = [[], [], []]
-testgamma[0] = np.loadtxt('gamma1')
-testgamma[1] = np.loadtxt('gamma2')
-testgamma[2] = np.loadtxt('gamma3')
+testgamma[0] = np.loadtxt('/Users/ziya03/Github/ml_methods/EM/gamma1')
+testgamma[1] = np.loadtxt('/Users/ziya03/Github/ml_methods/EM/gamma2')
+testgamma[2] = np.loadtxt('/Users/ziya03/Github/ml_methods/EM/gamma3')
 for idx in range(3):
     _, gamma = EStep(means, covariances, weights, data[idx])
-    absdiff = testgamma[idx] - gamma
+    absdiff = np.round(testgamma[idx] - gamma)
     print('Sum of difference of gammas: {0}\n'.format(np.sum(absdiff)))
 
 # test MStep
@@ -136,13 +136,13 @@ testparams[2,2][:, :, 2] = [
 ]
 for idx in range(3):
     weights, means, covariances, _ = MStep(testgamma[idx], data[idx])
-    absmeandiff = abs(means - testparams[0, idx])
-    absweightdiff = abs(weights - testparams[1, idx])
-    abscovdiff = abs(covariances - testparams[2, idx])
+    absmeandiff = abs(np.array(means) - np.array(testparams[0, idx]))
+    absweightdiff = abs(np.array(weights) - np.array(testparams[1, idx]))
+    abscovdiff = abs(np.array(covariances) - np.array(testparams[2, idx]))
 
-    print('Sum of difference of means:       {0}\n'.format(np.sum(absmeandiff)))
-    print('Sum of difference of weights:     {0}\n'.format(np.sum(absweightdiff)))
-    print('Sum of difference of covariances: {0}\n'.format(np.sum(abscovdiff)))
+    print('Sum of difference of means:       {0}\n'.format(np.round(np.sum(absmeandiff))))
+    print('Sum of difference of weights:     {0}\n'.format(np.round(np.sum(absweightdiff))))
+    print('Sum of difference of covariances: {0}\n'.format(np.round(np.sum(abscovdiff))))
 
 # test regularization
 print('\n')
