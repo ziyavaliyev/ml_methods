@@ -9,6 +9,7 @@ from MStep import MStep
 from regularize_cov import regularize_cov
 from plotModes import plotModes
 from skinDetection import skinDetection
+import cv2
 
 epsilon, K, n_iter, skin_n_iter, skin_epsilon, skin_K, theta = parameters()
 
@@ -162,7 +163,7 @@ regularized_cov[:, :, 2] = [
 ]
 for idx in range(3):
     covariance = regularize_cov(testparams[2, 0][:, :, idx], 0.01)
-    absdiff = abs(covariance - regularized_cov[:, :, idx])
+    absdiff = np.round(abs(covariance - regularized_cov[:, :, idx]))
     print('Sum of difference of covariances: {0}\n'.format(np.sum(absdiff)))
 
 
@@ -181,7 +182,7 @@ for idx in range(3):
     plt.title('Data {0}'.format(idx+1))
     plt.show()
 
-
+"""
 # uncomment following lines to generate the result
 # for different number of modes k plot the log likelihood for data3
 num = 14
@@ -191,21 +192,23 @@ for k in range(num):
     weights, means, covariances = estGaussMixEM(data[2], k+1, n_iter, epsilon)
     logLikelihood[k] = getLogLikelihood(means, weights, covariances, data[2])
 
+
 # plot result
 plt.subplot()
 plt.plot(range(num),logLikelihood)
 plt.title('Loglikelihood for different number of k on Data 3')
 plt.show()
+"""
 
 # skin detection
 print('\n')
 print('(g) performing skin detection with GMMs')
-sdata = np.loadtxt('skin.dat')
-ndata = np.loadtxt('non-skin.dat')
+sdata = np.loadtxt('/Users/ziya03/Github/ml_methods/EM/skin.dat')
+ndata = np.loadtxt('/Users/ziya03/Github/ml_methods/EM/non-skin.dat')
 
-img = im2double(misc.imread('faces.png'))
+img = im2double(misc.imread('/Users/ziya03/Github/ml_methods/EM/faces.png'))
 
 skin = skinDetection(ndata, sdata, skin_K, skin_n_iter, skin_epsilon, theta, img)
 plt.imshow(skin)
 plt.show()
-misc.imsave('skin_detection.png', skin)
+misc.imsave('/Users/ziya03/Github/ml_methods/EM/skin_detection.png', skin)

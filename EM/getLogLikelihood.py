@@ -24,7 +24,16 @@ def getLogLikelihood(means, weights, covariances, X):
     
     logLikelihood = 0
     bracket = []
-    N, D = X.shape
+    if str(X[0]).isdigit():
+        N = 1
+        D = len(X)
+    else:
+        N, D = X.shape
+    if len(X)==1:
+        D = 1
+    else:
+        D = len(X[0])
+    D = len(X)
     K = len(weights)
     for n in range(N):
         bracket = []

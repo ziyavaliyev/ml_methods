@@ -1,5 +1,5 @@
 import numpy as np
-from getLogLikelihood import getLogLikelihood
+from EM.getLogLikelihood import getLogLikelihood
 from EStep import EStep
 
 
@@ -22,7 +22,8 @@ def MStep(gamma, X):
 
     #####Insert your code here for subtask 6c#####
 
-    N, K = gamma.shape
+    #N, K = gamma.shape
+    N, K = len(gamma), len(gamma[0])
     D = X.shape[1]
     N_ = 0
     N_j = []

@@ -1,6 +1,5 @@
 import numpy as np
-from getLogLikelihood import getLogLikelihood, normal
-
+from EM.getLogLikelihood import getLogLikelihood, normal
 
 def EStep(means, covariances, weights, X):
     # Expectation step of the EM Algorithm
