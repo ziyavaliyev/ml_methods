@@ -109,86 +109,14 @@ class LossModule(NNModule):
 class Linear(NNModule):
     """Module which implements a linear layer"""
 
-    #####Start Subtask 2a#####
-    def __init__(self, n_in, n_out):
-        # Nbr input neurons
-        self.n_in = n_in
-        # Nbr output neurons
-        self.n_out = n_out
-        # Weights
-        self.W = None
-        # Biases
-        self.b = None
-        # Input cache for bprop
-        self.cache_input = None
-
-    def initialize_parameter(self):
-        # Glorot intialization
-        sigma = np.sqrt(2.0 / (self.n_in + self.n_out))
-        self.W = np.random.normal(0, sigma, (self.n_in, self.n_out))
-        self.b = np.zeros((1, self.n_out))
-        # self.W = np.zeros((self.n_in, self.n_out))
-
-    def fprop(self, input):
-        # A copy of the input for deriving parameter update
-        self.cache_input = np.array(input)
-        return np.matmul(input, self.W) + self.b
-
-    def bprop(self, grad_out):
-        return np.matmul(grad_out, self.W.transpose())
-
-    def get_grad_param(self, grad_out):
-        grad_w = np.matmul(self.cache_input.transpose(), grad_out)
-        # Distinguish batch mode
-        grad_b = np.sum(grad_out, 0) if grad_out.ndim > 1 else grad_out
-        return grad_w, grad_b
-
-    def apply_parameter_update(self, acc_grad_para, up_fun):
-        self.W = up_fun(self.W, acc_grad_para[0])
-        self.b = up_fun(self.b, acc_grad_para[1])
-
-    #####End Subtask#####
+    #####Insert your code here for subtask 2a#####
 
 
 # Task 2 b)
 class Softmax(NNModuleParaFree):
     """Softmax layer"""
 
-    #####Start Subtask 2b#####
-    def __init__(self):
-        # Cache output for bprob
-        self.cache_out = None
-
-    def fprop(self, input):
-        # See 4a for stability reasons
-        inp_max = np.max(input, 1)
-        # Transpose -> Numpy subtracts from each batch is inp_max using numpy's broadcasting
-        exponentials = np.exp((input.transpose() - inp_max).transpose())
-        normalization = np.sum(exponentials, 1)
-
-        # Transpose -> numpy broadcast -> see above
-        output = (exponentials.transpose() / normalization).transpose()
-        self.cache_out = np.array(output)
-
-        return output
-
-    def bprop(self, grad_out):
-        if grad_out.ndim == 2:
-            sz_batch, n_out = grad_out.shape
-        else:
-            sz_batch = 1
-            n_out = len(grad_out)
-
-        # 1. term
-        v_s = np.empty((sz_batch, 1))
-        for i in range(sz_batch):
-            v_s[i, :] = np.dot(grad_out[i, :], self.cache_out[i, :])
-        # 2. term
-        v_v_s = grad_out - np.broadcast_to(v_s, (sz_batch, n_out))
-        z = np.multiply(self.cache_out, v_v_s)
-        return z
-
-    #####End Subtask#####
+    #####Insert your code here for subtask 2b#####
 
 
 # Task 2 c)
