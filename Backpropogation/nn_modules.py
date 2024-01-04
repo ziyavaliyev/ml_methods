@@ -109,14 +109,66 @@ class LossModule(NNModule):
 class Linear(NNModule):
     """Module which implements a linear layer"""
 
-    #####Insert your code here for subtask 2a#####
+    def __init__(self, n_in, n_out):
+        self.cached_x = None
+        self.n_in = n_in
+        self.n_out = n_out
+        self.W = None
+        self.b = None
+
+    def initialize_parameter(self):
+        sigma = np.sqrt(2.0 / (self.n_in + self.n_out))
+        self.W = np.random.normal(0, sigma, (self.n_in, self.n_out))
+        self.b = np.zeros((1, self.n_out))
+
+    def fprop(self,x):
+        self.cached_x = np.array(x)
+        return np.matmul(x, self.W) + self.b
+    
+    def bprop(self, grad_out):
+        return np.matmul(grad_out, self.W.transpose())
+    
+    def apply_parameter_update(self, acc_grad_para, up_fun):
+        self.W = up_fun(self.W, acc_grad_para[0])
+        self.b = up_fun(self.b, acc_grad_para[1])
+    
+    def get_grad_param(self, grad_out):
+        grad_w = np.matmul(self.cached_x.transpose(), grad_out)
+        grad_b = np.sum(grad_out, 0) if grad_out.ndim > 1 else grad_out
+        return grad_w, grad_b
+
 
 
 # Task 2 b)
 class Softmax(NNModuleParaFree):
     """Softmax layer"""
 
-    #####Insert your code here for subtask 2b#####
+    def __init__(self):
+        self.cached_output = None
+
+    def fprop(self,x):
+        max_x = np.max(x, 1)
+        exponentials = np.exp((x.transpose() - max_x).transpose())
+        normalization = np.sum(exponentials, 1)
+        output = (exponentials.transpose() / normalization).transpose()
+        self.cached_output = np.array(output)
+        return output
+    
+    def bprop(self, grad_out):
+        if grad_out.ndim == 2:
+            sz_batch, n_out = grad_out.shape
+        else:
+            sz_batch = 1
+            n_out = len(grad_out)
+
+        v_s = np.empty((sz_batch, 1))
+        for i in range(sz_batch):
+            v_s[i, :] = np.dot(grad_out[i, :], self.cached_output[i, :])
+        
+        v_v_s = grad_out - np.broadcast_to(v_s, (sz_batch, n_out))
+        z = np.multiply(self.cached_output, v_v_s)
+
+        return z
 
 
 # Task 2 c)
@@ -155,7 +207,7 @@ class Tanh(NNModuleParaFree):
         return output
 
     def bprop(self, grad_out):
-        return np.multiply(grad_out, 1 - self.cache_out ** 2)
+        return (1-self.cache_out**2)*grad_out
 
 
 # Task 4 e)

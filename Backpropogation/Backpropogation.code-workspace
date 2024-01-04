@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Backpropogation",
+			"path": "."
+		},
+		{
+			"name": "mnist",
+			"path": "../../../Downloads/mnist"
+		}
+	],
+	"settings": {}
+}

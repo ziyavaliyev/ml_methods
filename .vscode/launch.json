@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "/Users/ziya03/Github/ml_methods/Backpropogation/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--train", "--task", "2"]
+        }
+    ]
+}
