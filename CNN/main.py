@@ -28,11 +28,22 @@ def val(net, val_dataloader):
     net.eval()
     accuracy = 0.0
     total = 0.0
+    correct = 0.0
     with torch.no_grad():
         for sample in enumerate(val_dataloader):
             #####Insert your code here for subtask 1j#####
             #Implement validation step where the batches of validation dataset are tested on the trained model
+            image = sample[1]['image'].to(device)
+            label = sample[1]['label'].to(device)
+            loss, logits = net(image, label)
+            pred_label = torch.argmax(logits)
+            total += label.size(0)
+
             #Calculate validation accuracy
+            accuracy += torch.sum(pred_label == label)
+
+    accuracy = correct/total   
+
     return accuracy, total
 
 
@@ -46,6 +57,22 @@ def test(net, test_dataloader, classes):
         #####Insert your code here for subtask 1k#####
         #Implement test step where the batches of test dataset are tested on the best trained model
         #Calculate test accuracy also confusion matrix
+            image = sample[1]['image'].to(device)
+            label = sample[1]['label'].to(device)
+            loss, logits = net(image, label)
+            pred_label = torch.argmax(logits)
+            if classes[pred_label] == label:
+                count += 1
+            predicted_labels.append(classes[pred_label])
+            true_labels.append(label.cpu().numpy()[0])
+            #Calculate test accuracy
+        accuracy = accuracy = count / len(test_dataloader)* 100
+
+        cf = confusion_matrix(predicted_labels, true_labels)
+
+        df_cm = pd.DataFrame(cf / np.sum(cf) * 100, index=[i for i in classes],
+                         columns=[i for i in classes])
+        
     return accuracy, df_cm
 
 
@@ -66,25 +93,27 @@ if __name__ == '__main__':
     #Data augmentation and normalization for training
     #Just normalization for validation
 
-    #####Insert your code here for subtask 1c#####
-    #Define train_dataset_transform, val_dataset_transform, test_dataset_transform
-    #Get help from torchvision.transforms module
+    train_dataset_transform = val_dataset_transform = test_dataset_transform = transforms.Compose([
+        transforms.Resize(size=(64,64)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
 
     # fetch training data
-    train_path = "../../../data/cityscapesExtracted/cityscapesExtractedResized"
+    train_path = "/Users/ziya03/Github/ml_methods/CNN/data/cityscapesExtracted/cityscapesExtractedResized"
     train_dataset = city_scapes(datapath=train_path,
                                 transform= train_dataset_transform)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size)
 
     # fetch validation data
-    val_path = "../../../data/cityscapesExtracted/cityscapesExtractedValResized"
+    val_path = "/Users/ziya03/Github/ml_methods/CNN/data/cityscapesExtracted/cityscapesExtractedTestResized"
     val_dataset = city_scapes(datapath=val_path,
                               transform=val_dataset_transform)
 
     val_dataloader = DataLoader(val_dataset, batch_size=1)
 
     # fetch evaluation data
-    test_path = "../../../data/cityscapesExtracted/cityscapesExtractedTestResized"
+    test_path = "/Users/ziya03/Github/ml_methods/CNN/data/cityscapesExtracted/cityscapesExtractedValResized"
     test_dataset = city_scapes(datapath=test_path,
                                transform=test_dataset_transform)
 
@@ -105,7 +134,7 @@ if __name__ == '__main__':
     optimizer = optim.SGD(net.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
 
     # define log for Tensorboard
-    writer = SummaryWriter()
+    #writer = SummaryWriter()
 
     print('-' * 10)
     best_val_acc = 0.0
@@ -120,9 +149,16 @@ if __name__ == '__main__':
             label = sample[1]['label'].to(device)
             loss, logits = net(image, label)
 
-            #####Insert your code here for subtask 1i#####
             #Calculate training loss and training accuracy
+            train_loss += loss.item() * image.size(0)
+            pred_label = torch.argmax(logits, 1)
+            total += label.size(0)
+            train_acc += torch.sum(pred_label == label)
+
             #Run backward pass and update weights
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
         train_loss = train_loss / total
         train_acc = (100 * train_acc / total)
@@ -141,9 +177,9 @@ if __name__ == '__main__':
         print(f'Val Accuracy:{val_acc:.4f}')
 
         # entry log data for Tensorboard
-        writer.add_scalar('Loss/train', train_loss, epoch)
-        writer.add_scalar('Accuracy/train', train_acc, epoch)
-        writer.add_scalar('Accuracy/val', val_acc, epoch)
+        #writer.add_scalar('Loss/train', train_loss, epoch)
+        #writer.add_scalar('Accuracy/train', train_acc, epoch)
+        #writer.add_scalar('Accuracy/val', val_acc, epoch)
 
         filename = "checkpoint_epoch_" + str(epoch + 1) + "_tb.pth.tar"
         torch.save(net.state_dict(), osp.join(save_network, filename))
@@ -151,7 +187,7 @@ if __name__ == '__main__':
         print("Model saved at", osp.join(save_network, filename))
         print('-' * 10)
 
-    writer.close()
+    #writer.close()
 
     # get the trained model giving the best validation accuracy
     print(f'Getting the best model, the model {best_model_index}, on the validation set.')

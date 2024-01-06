@@ -32,7 +32,11 @@ class city_scapes(Dataset):
         :param image: input image
         :return: True if number of pixels inside image is larger then size_threshold, false otherwise
         """
-        #####Insert your code here for subtask 1b#####
+        
+        if image.size[0] * image.size[1] > 900:
+            return True
+        else:
+            return False
 
     def get_labels(self, filename):
         labels = []
